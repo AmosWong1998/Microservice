@@ -1,0 +1,40 @@
+server:
+  port: 8888
+
+
+spring:
+  application:
+    name: gateway
+
+#eureka的相关配置
+eureka:
+  client:
+    service-url:
+      defaultZone: http://localhost:8761/eureka
+
+zuul:
+  #关于路由的配置
+  routes:
+    #简化写法 key表示服务的id
+    #value表示服务的映射路径 用户直接访问映射路径 然后服务端会从eureka拉取服务列表 根据服务的id找到对应的URL路径 然后再重定向到指定路径
+    user-service: /user-service/**
+  #忽略的服务 即外界通过映射路径是访问不到的
+  ignored-services:
+    - consumer-service
+
+
+#配置hystrix的超时时长
+hystrix:
+  command:
+    default:
+      execution:
+        isolation:
+          thread:
+            timeoutInMilliseconds: 2000
+
+
+#配置ribbon的超时时长 (ConnectionTimeout+ReadTimeout)* 2 < hystrix:timeoutInMilliseconds 因为需要先重试再进行熔断
+#详见:AbstractRibbonCommand getRibbonTimeout
+ribbon:
+  ConnectionTimeout: 500
+  ReadTimeout: 1000
